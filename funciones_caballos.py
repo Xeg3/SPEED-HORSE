@@ -231,7 +231,7 @@ def carrera(screen):
                     if back_button.checkForInput(mouse_menu):
                         respuesta = tk.confirmacion('No ha realizado una apuesta, ¿desea salir?')
                         if respuesta:
-                            return
+                            menu_carrera()
 
                 elif event.type == pygame.KEYDOWN:
                     if input_rect.active:
@@ -327,7 +327,7 @@ def carrera(screen):
     def pantalla_resultado():
         nonlocal ha_apostado, caballo_apuesta 
 
-        
+        recuadro_resultado=Button(pygame.transform.scale(pygame.image.load("images/datos_button.png"), (850, 100)), (640, 180), None, font, NEGRO, None)
         back_button = Button(pygame.transform.scale(pygame.image.load("images/back_button.png"), (200, 80)), (1180, 675), None, font, NEGRO, None)
 
         ganador = max(caballos.items(), key=lambda item: item[1].posicion)[0]
@@ -346,9 +346,9 @@ def carrera(screen):
         while run:
             mouse_menu = pygame.mouse.get_pos()
             screen.blit(fondo, (0, 0))
-            resultado_button = Button(None, (ANCHO / 2, ALTO / 4), mensaje, font2, NEGRO, None)
-            resultado_button.update(screen)
-            back_button.update(screen)
+            resultado_button = Button(None, (ANCHO / 2, ALTO / 4), mensaje, font2, BLANCO, None)
+            for i in [recuadro_resultado, back_button, resultado_button]:
+                i.update(screen)
             pygame.display.flip()
 
             for event in pygame.event.get():
