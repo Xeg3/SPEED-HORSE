@@ -19,7 +19,7 @@ ROJO = (255, 0, 0)
 
 # Fuentes globales para textos
 
-FUENTE_INPUT = pygame.font.Font(None, 24)
+FUENTE_INPUT = pygame.font.Font(None, 28)
 FUENTE1 = pygame.font.Font("Recurso_generales/caballos/fonts/Race Sport.ttf", 28)
 FUENTE2 = pygame.font.Font("Recurso_generales/caballos/fonts/Race Sport.ttf", 15)
 FUENTE_CONTEO = pygame.font.Font("Recurso_generales/caballos/fonts/Race Sport.ttf", 200)

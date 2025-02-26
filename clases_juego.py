@@ -2,8 +2,7 @@ import pygame
 import sys
 import datos_caballos as dc
 from button import Button
-import funciones_tkinter as tk
-from inputbox import Caja
+from Inputbox import Caja
 from config import *
 
 
@@ -169,22 +168,27 @@ class MenuApuesta(Menu):
         self.caballo_apuesta = [None, None]
 
     def ejecutar(self):
-        input_caballo = Caja(790, 200, 190, 32, ROJO, NEGRO, FUENTE_INPUT, FUENTE_INPUT, False, False)
-        input_monto = Caja(790, 500, 190, 32, ROJO, NEGRO, FUENTE_INPUT, FUENTE_INPUT, False, False)
+        input_caballo = Caja(760, 200, 260, 40, ROJO, NEGRO, FUENTE_INPUT, FUENTE_INPUT, False, False)
+        input_monto = Caja(760, 500, 260, 40, ROJO, NEGRO, FUENTE_INPUT, FUENTE_INPUT, False, False)
         caballo = None
         monto = 0
+        activar_carrera=False
 
         while True:
             self.screen.blit(self.fondo, (0, 0))
             mostrar_caballos(self.caballos, self.screen)
             mouse_menu = pygame.mouse.get_pos()
 
-            apuesta_button = Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/boton_caballo.png"), (600, 90)),(850, 100), None, FUENTE1, NEGRO, None)
-            monto_button = Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/boton_monto.png"), (600, 90)), (850, 400), None, FUENTE1, NEGRO, None)
-            back_button = Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/back_button.png"), (200, 80)), (1180, 675), None, FUENTE1, NEGRO, None)
+            apuesta_button = Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/boton_caballo.png"), (610, 90)),(870, 100), None, FUENTE1, NEGRO, None)
+            monto_button = Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/boton_monto.png"), (610, 90)), (870, 400), None, FUENTE1, NEGRO, None)
+            
+            if activar_carrera:
+                carrera_salir_button = Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/carrera_button.png"), (310, 90)), (1110, 675), None, FUENTE1, NEGRO, None)
+            else:
+                carrera_salir_button = Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/back_button.png"), (200, 80)), (1180, 675), None, FUENTE1, NEGRO, None)
             button_saldo = Button(pygame.image.load('Recurso_generales/caballos/images/saldo_image.png'), (680, 680), f'SALDO: {float(self.usuario.mostrar_saldo()) - monto:.2f}', FUENTE1, NEGRO, None)
 
-            for btn in [apuesta_button, monto_button, back_button, button_saldo]:
+            for btn in [apuesta_button, monto_button, carrera_salir_button, button_saldo]:
                 btn.update(self.screen)
 
             for event in pygame.event.get():
@@ -196,11 +200,18 @@ class MenuApuesta(Menu):
                     input_caballo.activar(event)
                     input_monto.activar(event)
 
-                    if back_button.checkForInput(mouse_menu):
-                        
-                        if tk.confirmacion('No ha realizado una apuesta, ¿desea salir?'):
+                    if carrera_salir_button.checkForInput(mouse_menu):
+                        if activar_carrera:
+                            self.sonido.reproducir_sonido(self.sonido_click, 0.6)
+                            self.sonido.detener_musica()
+                            apuesta = self.usuario.apostar(monto)
+                            self.caballo_apuesta.extend([caballo, apuesta])
+                            self.ha_apostado = True
+                            return Carrera(self.screen, self.usuario, self.caballos, self.caballo_apuesta).ejecutar()
+                        else:
                             self.sonido.reproducir_sonido(self.sonido_click, 0.6)
                             return MenuModalidad(self.screen, self.usuario).ejecutar()
+
 
                 elif event.type == pygame.KEYDOWN:
 
@@ -230,25 +241,26 @@ class MenuApuesta(Menu):
                     elif event.key in (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8):
                         self.sonido.reproducir_sonido(self.sonido_click, 0.6)
                         opcion = event.unicode
-                        if opcion in self.caballos:
-                            
-                            return MenuDatos(self.screen, self.usuario, self.caballos, opcion).ejecutar()
-                        else:
-                            tk.text_error('Caballo no participante.')
-                            
+                        if opcion in self.caballos and not activar_carrera:
+                            return MenuDatos(self.screen, self.usuario, self.caballos, opcion).ejecutar()                        
 
             for i in [input_caballo, input_monto]:
                 i.cambia_color()
-                i.dibujar(screen)
+                i.dibujar(self.screen)
 
-            if monto is not None and monto >= 100 and caballo in self.caballos:
-                apuesta = self.usuario.apostar(monto)
-                self.caballo_apuesta.extend([caballo, apuesta])
-                tk.text_info(f'Apuesta realizada con éxito, {self.caballo_apuesta[1]}$ por caballo #{self.caballo_apuesta[0]}')
-                self.sonido.reproducir_sonido(self.sonido_click, 0.6)
-                self.sonido.detener_musica()
-                self.ha_apostado = True
-                return Carrera(self.screen, self.usuario, self.caballos, self.caballo_apuesta).ejecutar()
+            if input_caballo.cont:
+                check_button = Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/right.png"), (100, 100)), (1060, 220), None, FUENTE1, NEGRO, None)
+                check_button.update(screen)
+
+            if input_monto.cont:
+                check_button2 = Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/right.png"), (100, 100)), (1060, 520), None, FUENTE1, NEGRO, None)
+                check_button2.update(screen)
+
+            if monto >= 100 and caballo in self.caballos:
+
+                activar_carrera = True
+                notificacion = Button(pygame.image.load("Recurso_generales/caballos/images/notificacion.png"), (610, 360), None, FUENTE1, NEGRO, None)
+                notificacion.update(screen)        
 
             pygame.display.flip()
 
@@ -332,11 +344,11 @@ class PantallaResultado(Menu):
                 sonido_reproducido = True
             
             if ganador == caballo_apostado:
-                self.screen.blit(victoria, (450, 270))
+                self.screen.blit(victoria, (440, 250))
             else:
-                self.screen.blit(derrota, (470, 300))
+                self.screen.blit(derrota, (480, 280))
 
-            resultado_button = Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/running_horse_2.png"), (700, 80)), (ANCHO / 2, ALTO / 5), mensaje, FUENTE1, BLANCO, None)
+            resultado_button = Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/running_horse_2.png"), (700, 80)), (ANCHO / 2, ALTO / 6), mensaje, FUENTE1, BLANCO, None)
 
             for btn in [resultado_button, button_saldo, back_button]:
                 btn.update(self.screen)
@@ -450,12 +462,12 @@ class Carrera:
 
 def mostrar_caballos(caballos, screen):
     
-    x=200
+    x=220
     y=125
 
-    frame=Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/frame_list.png"), (400, 480)), (200, 280), None, FUENTE1, NEGRO, None)
-    list_button=Button(None, (200, 80), 'CABALLOS - CUOTA', FUENTE1, BLANCO, None)
-    info_button=Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/message.png"), (400, 150)), (200, 620), None, FUENTE1, NEGRO, None)
+    frame=Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/frame_list.png"), (400, 480)), (220, 280), None, FUENTE1, NEGRO, None)
+    list_button=Button(None, (220, 80), 'CABALLOS - CUOTA', FUENTE1, BLANCO, None)
+    info_button=Button(pygame.transform.scale(pygame.image.load("Recurso_generales/caballos/images/message.png"), (400, 150)), (220, 620), None, FUENTE1, NEGRO, None)
 
     for i in [frame, list_button, info_button]:
         i.update(screen)
