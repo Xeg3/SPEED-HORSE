@@ -1,5 +1,5 @@
 import pygame as py
-from config import *
+
 
 class Caja():
 
@@ -37,38 +37,40 @@ class Caja():
         py.draw.rect(screen, self.color, self.rect)
 
         if self.mensaje2=='':
-            text_surface = self.font2.render(self.mensaje, True, (BLANCO))
+            text_surface = self.font2.render(self.mensaje, True, (255, 255, 255))
         else:
-            text_surface = self.font.render(self.mensaje2, True, (BLANCO))
+            text_surface = self.font.render(self.mensaje2, True, (255, 255, 255))
         
 
-        screen.blit(text_surface, (self.rect.x+2, self.rect.y+6))
+        screen.blit(text_surface, (self.rect.x+5, self.rect.y+5))
 
     def verificacion(self, var, opcion):
         if opcion == 1:
             if self.mensaje in var:
                 if not self.cont:
                     caballo=self.mensaje
+                    tk.text_info(f'Ha elegido al caballo #{caballo}')
                     self.cont = True
                     self.active = False
-                    self.mensaje=f'Eligió al Caballo #{caballo}'
                     return caballo
             else:
-                self.mensaje2="No válido, intente de nuevo"
-                self.mensaje=''
-                
+                tk.text_error('Error, ingrese un caballo válido')
         else:
             try:
                 monto = float(self.mensaje.strip())
                 if 100 <= monto <= var:
                     if not self.cont:
+                        tk.text_info(f'Ha hecho una apuesta de {monto}$')
                         self.cont = True
                         self.active = False
-                        self.mensaje=f'Monto = {monto}$'
+                        return monto
+                    else:
+                        tk.text_info(f'Ya ha realizado una apuesta de {monto}$')
                         return monto
                 else:
-                    self.mensaje2="No válido, intente de nuevo"
-                    self.mensaje=''
+                    tk.text_error('Error, ingrese un monto válido')
+                    return None
+
             except ValueError:
-                self.mensaje2="No válido, intente de nuevo"
-                self.mensaje=''
+                tk.text_error('Error, ingrese un monto válido')
+                return None
