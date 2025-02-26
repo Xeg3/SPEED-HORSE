@@ -1,10 +1,14 @@
 import pygame
-import funciones_caballos as fc
 
+pygame.init()
+
+from clases_juego import MenuModalidad, Usuario
 from config import *
 
-def run_game():
-    
-    fc.carrera(screen)
 
-run_game()
+def correr_juego():
+    
+    usuario = Usuario(1000)
+    MenuModalidad(screen, usuario).ejecutar()
+
+correr_juego()
